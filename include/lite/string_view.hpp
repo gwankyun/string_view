@@ -9,7 +9,7 @@
 
 namespace lite
 {
-    template <typename CharT, typename Traits = std::char_traits<CharT>>
+    template < typename CharT, typename Traits = std::char_traits<CharT> >
     class basic_string_view
     {
     public:
@@ -20,8 +20,7 @@ namespace lite
         typedef CharT &reference;
         typedef const CharT &const_reference;
 
-        // typedef const basic_string_view_const_iterator<CharT> const_iterator;
-        typedef LegacyRandomAccessIterator<basic_string_view_const_iterator<CharT>> const_iterator;
+        typedef LegacyRandomAccessIterator< basic_string_view_const_iterator<CharT> > const_iterator;
         typedef const_iterator iterator;
         typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
         typedef const_reverse_iterator reverse_iterator;
@@ -61,10 +60,10 @@ namespace lite
             return *this;
         }
 
-        static CONSTEXPR size_type npos()
-        {
-            return size_type(-1);
-        }
+        // static CONSTEXPR size_type npos()
+        // {
+        //     return size_type(-1);
+        // }
 
         // basic_string_view<CharT,Traits>::begin
 
@@ -98,8 +97,6 @@ namespace lite
 
         constexpr const_reverse_iterator rbegin() const noexcept
         {
-            // return data() + size() - 1;
-            // return begin() + size() - 1;
             return std::reverse_iterator<const_iterator>(end());
         }
 
@@ -112,9 +109,6 @@ namespace lite
 
         constexpr const_reverse_iterator rend() const noexcept
         {
-            // return begin() - 1;
-            // return std::prev(begin());
-            // return const_reverse_iterator(data()) - 1;
             return rbegin() + size();
         }
 
@@ -173,7 +167,7 @@ namespace lite
 
         CONSTEXPR size_type max_size() const NOEXCEPT
         {
-            return 1000 * 1000;
+            return 0xFFFFFFFF;
         }
 
         NODISCARD CONSTEXPR bool empty() const NOEXCEPT
@@ -215,10 +209,10 @@ namespace lite
             return rcount;
         }
 
-        CONSTEXPR basic_string_view substr(size_type pos = 0, size_type count = npos()) const
+        CONSTEXPR basic_string_view substr(size_type pos = 0, size_type count = _npos()) const
         {
             size_type copy_count = 0;
-            if (count == basic_string_view::npos())
+            if (count == _npos())
             {
                 copy_count = size() - pos;
             }
@@ -310,7 +304,7 @@ namespace lite
 
         CONSTEXPR bool ends_with(basic_string_view sv) const NOEXCEPT // 1
         {
-            return size() >= sv.size() && compare(size() - sv.size(), npos(), sv) == 0;
+            return size() >= sv.size() && compare(size() - sv.size(), _npos(), sv) == 0;
         }
 
         CONSTEXPR bool ends_with(CharT c) const NOEXCEPT // 2
@@ -327,49 +321,41 @@ namespace lite
 
         CONSTEXPR bool contains(basic_string_view sv) const NOEXCEPT
         {
-            return find(sv) != npos();
+            return find(sv) != _npos();
         }
 
         CONSTEXPR bool contains(CharT c) const NOEXCEPT
         {
-            return find(c) != npos();
+            return find(c) != _npos();
         }
 
         CONSTEXPR bool contains(const CharT *s) const
         {
-            return find(s) != npos();
+            return find(s) != _npos();
         }
 
         // basic_string_view<CharT, Traits>::find
 
         CONSTEXPR size_type find(basic_string_view v, size_type pos = 0) const NOEXCEPT // 1
         {
-            if (size() - pos < v.size())
-            {
-                return npos();
-            }
+            if (size() - pos < v.size()) return _npos();
 
             const_iterator iter = std::search(begin() + pos, end(), v.begin(), v.end());
-            if (iter == end())
-            {
-                return basic_string_view::npos();
-            }
-            return iter - this->begin();
+
+            if (iter == end()) return _npos();
+
+            return iter - begin();
         }
 
         CONSTEXPR size_type find(CharT ch, size_type pos = 0) const NOEXCEPT // 2
         {
-            if (size() - pos < 1)
-            {
-                return npos();
-            }
+            if (size() - pos < 1) return _npos();
 
             const_iterator iter = std::find(begin() + pos, end(), ch);
-            if (iter == end())
-            {
-                return basic_string_view::npos();
-            }
-            return iter - this->begin();
+
+            if (iter == end()) return _npos();
+
+            return iter - begin();
         }
 
         CONSTEXPR size_type find(const CharT *s, size_type pos, size_type count) const // 3
@@ -384,19 +370,18 @@ namespace lite
 
         // basic_string_view<CharT,Traits>::rfind
 
-        CONSTEXPR size_type rfind(basic_string_view v, size_type pos = npos()) const NOEXCEPT // 1
+        CONSTEXPR size_type rfind(basic_string_view v, size_type pos = _npos()) const NOEXCEPT // 1
         {
-            if (size() < v.size())
-                return _npos();
+            if (size() < v.size()) return _npos();
 
             const_reverse_iterator iter = std::search(rbegin() + pos, rend(), v.rbegin(), v.rend());
-            if (iter == rend())
-                return this->_npos();
+
+            if (iter == rend()) return _npos();
 
             return size() - (iter - rbegin()) - v.size();
         }
 
-        CONSTEXPR size_type rfind(CharT c, size_type pos = npos()) const NOEXCEPT // 2
+        CONSTEXPR size_type rfind(CharT c, size_type pos = _npos()) const NOEXCEPT // 2
         {
             return rfind(basic_string_view(&c, 1), pos);
         }
@@ -406,7 +391,7 @@ namespace lite
             return rfind(basic_string_view(s, count), pos);
         }
 
-        CONSTEXPR size_type rfind(const CharT* s, size_type pos = npos()) const // 4
+        CONSTEXPR size_type rfind(const CharT* s, size_type pos = _npos()) const // 4
         {
             return rfind(basic_string_view(s), pos);
         }
@@ -435,16 +420,16 @@ namespace lite
 
         // basic_string_view<CharT,Traits>::find_last_of
 
-        CONSTEXPR size_type find_last_of(basic_string_view v, size_type pos = npos()) const NOEXCEPT // 1
+        CONSTEXPR size_type find_last_of(basic_string_view v, size_type pos = _npos()) const NOEXCEPT // 1
         {
             const_reverse_iterator iter = std::find_first_of(rbegin(), rend() - pos, v.rbegin(), v.rend());
-            if (iter == rend())
-                return this->_npos();
+
+            if (iter == rend()) return _npos();
 
             return size() - (iter - rbegin()) - 1;
         }
 
-        CONSTEXPR size_type find_last_of(CharT c, size_type pos = npos()) const NOEXCEPT // 2
+        CONSTEXPR size_type find_last_of(CharT c, size_type pos = _npos()) const NOEXCEPT // 2
         {
             return find_last_of(basic_string_view(&c, 1), pos);
         }
@@ -454,36 +439,83 @@ namespace lite
             return find_last_of(basic_string_view(s, count), pos);
         }
 
-        CONSTEXPR size_type find_last_of(const CharT* s, size_type pos = npos()) const // 4
+        CONSTEXPR size_type find_last_of(const CharT* s, size_type pos = _npos()) const // 4
         {
             return find_last_of(basic_string_view(s), pos);
         }
 
         // basic_string_view<CharT,Traits>::find_first_not_of
 
-        CONSTEXPR size_type find_first_not_of(basic_string_view v, size_type pos = 0) const NOEXCEPT
+        CONSTEXPR size_type find_first_not_of(basic_string_view v, size_type pos = 0) const NOEXCEPT // 1
         {
-            struct Pred
-            {
-                Pred(basic_string_view& _v) : m_v(_v) {};
-                ~Pred() {};
-                bool operator()(const value_type& a, const value_type&)
-                {
-                    return std::find(m_v.begin(), m_v.end(), a) == m_v.end();
-                }
-            private:
-                basic_string_view& m_v;
-            } pred(v);
+            Pred<const_iterator> pred(v.begin(), v.end());
 
             return std::find_first_of(begin() + pos, end(), v.begin(), v.end(), pred) - this->begin();
         }
 
-        size_type _npos() const
+        CONSTEXPR size_type find_first_not_of(CharT c, size_type pos = 0) const NOEXCEPT // 2
+        {
+            return find_first_not_of(basic_string_view(&c, 1), pos);
+        }
+
+        CONSTEXPR size_type find_first_not_of(const CharT* s, size_type pos, size_type count) const // 3
+        {
+            return find_first_not_of(basic_string_view(s, count), pos);
+        }
+
+        CONSTEXPR size_type find_first_not_of(const CharT* s, size_type pos = 0) const // 4
+        {
+            return find_first_not_of(basic_string_view(s), pos);
+        }
+
+        // basic_string_view<CharT,Traits>::find_last_not_of
+
+        CONSTEXPR size_type find_last_not_of(basic_string_view v, size_type pos = _npos()) const NOEXCEPT // 1
+        {
+            Pred<const_reverse_iterator> pred(v.rbegin(), v.rend());
+
+            const_reverse_iterator iter = std::find_first_of(rbegin(), rend() - pos, v.rbegin(), v.rend(), pred);
+
+            if (iter == rend()) return _npos();
+
+            return size() - (iter - rbegin()) - 1;
+        }
+
+        CONSTEXPR size_type find_last_not_of(CharT c, size_type pos = _npos()) const NOEXCEPT // 2
+        {
+            return find_last_not_of(basic_string_view(&c, 1), pos);
+        }
+
+        CONSTEXPR size_type find_last_not_of(const CharT* s, size_type pos, size_type count) const // 3
+        {
+            return find_last_not_of(basic_string_view(s, count), pos);
+        }
+
+        constexpr size_type find_last_not_of(const CharT* s, size_type pos = _npos()) const // 4
+        {
+            return find_last_not_of(basic_string_view(s), pos);
+        }
+
+        static CONSTEXPR size_type _npos()
         {
             return size_type(-1);
         }
 
     private:
+        template <typename It>
+        struct Pred
+        {
+            Pred(It _b, It _e) : b(_b), e(_e){};
+            ~Pred(){};
+            bool operator()(const value_type &a, const value_type &)
+            {
+                return std::find(b, e, a) == e;
+            }
+        private:
+            It b;
+            It e;
+        };
+
         void _init(const_pointer _data, size_type _size)
         {
             m_data = _data;

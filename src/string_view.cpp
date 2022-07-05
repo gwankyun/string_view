@@ -137,7 +137,7 @@ TEST_CASE("substr")
     string_view_t::size_type npos = 0;
     if constexpr (std::is_same_v<string_view_t, lite::string_view>)
     {
-        npos = lite::string_view::npos();
+        npos = lite::string_view::_npos();
     }
     else
     {
@@ -262,6 +262,14 @@ TEST_CASE("find_first_not_of")
     CHECK(sv.find_first_not_of(string_view_t("12")) == 2); // 1
 }
 
+TEST_CASE("find_last_not_of")
+{
+    string_view_t sv("123412");
+    std::string_view sv_s("123412");
+
+    CHECK(sv.find_last_not_of(string_view_t("12")) == sv_s.find_last_not_of(std::string_view("12"))); // 1
+}
+
 TEST_CASE("operator=")
 {
     string_view_t sv1("123");
@@ -280,4 +288,68 @@ TEST_CASE("operator== != < <= > >=")
     CHECK((sv1 <= sv2));
     CHECK((sv2 > sv1));
     CHECK((sv2 >= sv1));
+}
+
+template<typename InputIt, typename UnaryPredicate>
+CONSTEXPR InputIt find_last_if(InputIt first, InputIt last, UnaryPredicate p)
+{
+    typedef std::reverse_iterator<InputIt> reverse_it;
+    reverse_it rfirst = reverse_it(last);
+    reverse_it rlast = reverse_it(first);
+    std::ptrdiff_t size = last - first;
+
+    reverse_it riter = std::find_if(rfirst, rlast, p);
+
+    if (riter == rlast) return last;
+
+    std::ptrdiff_t dist = riter - rfirst;
+
+    return first + (size - 1 - dist);
+}
+
+template<typename InputIt, typename T>
+CONSTEXPR InputIt find_last(InputIt first, InputIt last, const T& value)
+{
+    struct Pred
+    {
+        Pred(const T& _value) : value(_value) {};
+        ~Pred() {};
+        bool operator()(const T& _value) { return _value == value; }
+        const T& value;
+    } pred(value);
+
+    return find_last_if(first, last, pred);
+}
+
+template<typename InputIt, typename UnaryPredicate>
+CONSTEXPR InputIt find_last_if_not(InputIt first, InputIt last, UnaryPredicate q)
+{
+    struct Pred
+    {
+        Pred(const UnaryPredicate& _q) : q(_q) {};
+        ~Pred() {};
+        bool operator()(const typename InputIt::value& _value) { return !q(_value); }
+        const UnaryPredicate& q;
+    } pred(q);
+
+    return find_last_if(first, last, pred);
+}
+
+TEST_CASE("reverse")
+{
+    std::vector<int> vec{ 1, 2, 3, 4, 5 };
+
+    auto a = std::find(vec.begin(), vec.end(), 4);
+    auto i = a - vec.begin();
+    CHECK(i == 3);
+    auto b = std::find(vec.rbegin(), vec.rend(), 4);
+    auto r = b - vec.rbegin();
+    CHECK(r == 1);
+    CHECK(vec.size() - 1 == i + r);
+
+    std::vector<int> v2{ 1, 4, 3, 4, 5 };
+    auto c = find_last(v2.begin(), v2.end(), 4);
+    CHECK(c - v2.begin() == 3);
+    CHECK(find_last(v2.begin(), v2.end(), 6) == v2.end());
+    CHECK(find_last(v2.begin(), v2.end(), 1) == v2.begin());
 }
