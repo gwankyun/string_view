@@ -1,4 +1,4 @@
-#define DOCTEST_CONFIG_IMPLEMENT
+﻿#define DOCTEST_CONFIG_IMPLEMENT
 #include <doctest/doctest.h>
 #include <lite/string_view.hpp>
 #include <cstring>
@@ -293,12 +293,12 @@ TEST_CASE("operator== != < <= > >=")
 template<typename InputIt, typename UnaryPredicate>
 CONSTEXPR InputIt find_last_if(InputIt first, InputIt last, UnaryPredicate p)
 {
-    typedef std::reverse_iterator<InputIt> reverse_it;
-    reverse_it rfirst = reverse_it(last);
-    reverse_it rlast = reverse_it(first);
+    typedef std::reverse_iterator<InputIt> rvs_it;
+    rvs_it rfirst(last);
+    rvs_it rlast(first);
     std::ptrdiff_t size = last - first;
 
-    reverse_it riter = std::find_if(rfirst, rlast, p);
+    rvs_it riter = std::find_if(rfirst, rlast, p);
 
     if (riter == rlast) return last;
 
@@ -324,11 +324,12 @@ CONSTEXPR InputIt find_last(InputIt first, InputIt last, const T& value)
 template<typename InputIt, typename UnaryPredicate>
 CONSTEXPR InputIt find_last_if_not(InputIt first, InputIt last, UnaryPredicate q)
 {
+    typedef typename std::iterator_traits<InputIt>::value_type value_type;
     struct Pred
     {
         Pred(const UnaryPredicate& _q) : q(_q) {};
         ~Pred() {};
-        bool operator()(const typename InputIt::value& _value) { return !q(_value); }
+        bool operator()(const value_type& _value) { return !q(_value); }
         const UnaryPredicate& q;
     } pred(q);
 
@@ -352,4 +353,13 @@ TEST_CASE("reverse")
     CHECK(c - v2.begin() == 3);
     CHECK(find_last(v2.begin(), v2.end(), 6) == v2.end());
     CHECK(find_last(v2.begin(), v2.end(), 1) == v2.begin());
+    CHECK(find_last_if_not(v2.begin(), v2.end(), [](const int& v) { return v == 4; }) == v2.begin() + 4);
+}
+
+TEST_CASE("lite::find_last_of")
+{
+    std::vector<int> vec{ 1, 4, 5, 4, 5 };
+    std::vector<int> v{ 4, 5 };
+    auto it = lite::find_last_of(vec.begin(), vec.end(), v.begin(), v.end());
+    CHECK(it - vec.begin() == 4);
 }

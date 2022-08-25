@@ -1,5 +1,7 @@
 #pragma once
 #include <cstddef> // std::ptrdiff_t
+#include <iterator>
+#include "LegacyRandomAccessIterator.hpp"
 
 namespace lite
 {

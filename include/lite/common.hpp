@@ -1,15 +1,7 @@
-#pragma once
+﻿#pragma once
 #include <cstddef> // std::size_t std::ptrdiff_t
 #include <iterator> // std::input_iterator_tag
-
-#ifndef NULLPTR
-#  define NULLPTR nullptr
-#endif
-
-#define CONSTEXPR constexpr
-#define NOEXCEPT noexcept
-#define NULLPTR nullptr
-#define NODISCARD [[nodiscard]]
+#include "macro.hpp"
 
 template<typename D, typename T>
 struct Indirection
@@ -90,7 +82,6 @@ struct MemberAccess
         return T::member_access(self.get());
     }
 };
-
 
 template<typename D, typename T>
 struct Subscript

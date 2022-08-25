@@ -43,6 +43,9 @@ target_sources(${string_view} PRIVATE
   include/lite/common.hpp
   include/lite/LegacyRandomAccessIterator.hpp
   include/lite/string_view.hpp
+  include/lite/iterator.hpp
+  include/lite/algorithm.hpp
+  include/lite/macro.hpp
 )
 target_include_directories(${string_view} PRIVATE include)
 target_link_libraries(${string_view} PUBLIC doctest::doctest)
